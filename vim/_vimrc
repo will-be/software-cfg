@@ -1,0 +1,459 @@
+"------------------------------自定义配置--------------------------------------
+"
+if(has("win32") || has("win95") || has("win64") || has("win16")) "判定当前操作系统类型
+    let g:iswindows=1
+else
+    let g:iswindows=0
+endif
+
+" set go = "无菜单、工具栏" 
+set guioptions-=T
+
+" 启动时自动最大化窗口
+if has('win32')
+  au GUIEnter * simalt ~x
+else
+  au GUIEnter * call MaximizeWindow()
+endif
+
+function! MaximizeWindow()
+  silent !wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz
+endfunction
+
+" time stamp " ==============================================
+imap <C-F12> <C-R>=strftime("[%Y-%m-%d/%H:%M:%S]")<CR>
+
+"   ctags 相关===============================================
+set	tags=tags;
+set	autochdir
+" TagList====================================================
+"
+map <F9> :silent! Tlist<CR>                                                         "按下F9就可以呼出了
+let Tlist_Show_One_File=1
+let Tlist_Exit_OnlyWindow=1     
+let Tlist_Auto_Update=1
+let Tlist_Use_Right_Window=1
+
+" WinManager 整合 TagList 和 netrw===========================
+" wm 命令  help winmanager
+let g:winManagerWindowLayout='FileExplorer|TagList'
+nmap wm :WMToggle<cr>
+
+
+"QuickFix======================================================
+":cn        // 切换到下一个结果
+":cp        // 切换到上一个结果
+
+nmap <F6> :cn<cr>
+nmap <F7> :cp<cr>
+
+" cscope =====================================================
+"设定是否使用 quickfix 窗口来显示 cscope 结果, 用法在后面会说到
+set cscopequickfix=s-,c-,d-,i-,t-,e-
+
+function ViewInsight()
+    menu &ViewInsight.FindReference<TAB>cs\ f\ &s :cs find s <C-R>=expand("<cword>")<CR><CR>
+    menu &ViewInsight.FindDefine<TAB>cs\ f\ &g :cs find g <C-R>=expand("<cword>")<CR><CR>
+    menu &ViewInsight.FindFile<TAB>cs\ f\ &f :cs find f 
+    menu &ViewInsight.GotoFunCalled<TAB>cs\ f\ &c :cs find c <C-R>=expand("<cword>")<CR><CR>
+    menu &ViewInsight.LocalVarDefine<TAB>gd gd
+    menu &ViewInsight.GlobalVarDefine<TAB>gD gD
+    menu &ViewInsight.-result- :
+    menu &ViewInsight.SearchResult<TAB>:copen :copen<CR>
+    menu &ViewInsight.PreviousResult<TAB>:cold :cold<CR>
+    menu &ViewInsight.NextResult<TAB>:cnew :cnew<CR>
+    menu &ViewInsight.Back<TAB>C-O <ESC><C-O>
+    set csqf=s-,g-,c-
+    nmap <F8> <ESC>:Tlist<CR>
+    nmap <C-H> ?^{?,/^}/s/\<<C-R>=expand("<cword>")<CR>\>//gc<LEFT><LEFT><LEFT>
+endfunction
+
+" NERD_commenter ================================================
+let NERDShutUp=1
+let NERDSpaceDelims=1 " 让注释符与语句之间留一个空格 
+let NERDCompactSexyComs=1 " 多行注释时样子更好看
+"let NERDRPlace=85 
+
+"支持单行和多行的选择，//格式
+map <F4> ,c<space>
+
+" DoxygenToolkit ===============================================
+map fg : Dox<cr>
+let g:DoxygenToolkit_authorName="wilge"
+let g:DoxygenToolkit_licenseTag="Copyright Inc. All Rights Reserved.\<enter>"
+let g:DoxygenToolkit_undocTag="DOXIGEN_SKIP_BLOCK"
+" let g:DoxygenToolkit_briefTag_pre = "Summary: \t"
+" let g:DoxygenToolkit_paramTag_pre = "Parameter: \t"
+" let g:DoxygenToolkit_returnTag = "Return: \t"
+" let g:DoxygenToolkit_briefTag_funcName = "no"
+" let g:DoxygenToolkit_maxFunctionProtoLines = 30
+" let g:DoxygenToolkit_startCommentTag = "// "
+" let g:DoxygenToolkit_interCommentTag = "// "
+" let g:DoxygenToolkit_endCommentTag = "// "
+" let g:DoxygenToolkit_startCommentBlock = "// "
+" let g:DoxygenToolkit_interCommentBlock = "// "
+" let g:DoxygenToolkit_endCommentBlock = "// "
+
+"插件: A========================================================
+"c/h文件间相互切换 
+
+nnoremap <silent> <F12> :A<CR>
+
+" 将外部命令 wmctrl 控制窗口最大化的命令行参数封装成一个 vim 的函数
+fun! ToggleFullscreen()
+  call system("wmctrl -ir " . v:windowid . " -b toggle,fullscreen")
+endf
+" 全屏开/关快捷键
+map <silent> <F11> :call ToggleFullscreen()<CR>
+" 启动 vim 时自动全屏
+" autocmd VimEnter * call ToggleFullscreen()
+
+" sketch.vim ===================================================
+"
+" noremap <F11> :call ToggleSketch()<CR>
+
+" 窗口切换 =====================================================
+noremap <C-J> <C-W>j
+noremap <C-K> <C-W>k
+noremap <C-H> <C-W>h
+noremap <C-L> <C-W>l
+
+noremap <C-Down>  <C-W>j
+noremap <C-Up>    <C-W>k
+noremap <C-Left>  <C-W>h
+noremap <C-Right> <C-W>l
+
+" buffer 切换 ===================================================
+noremap <C-S-Tab> :bn<CR>
+
+"MiniBufExplorer ==============================================
+"<C-Tab> 向前循环切换到每个buffer上,并在但前窗口打开 
+"<C-S-Tab> 向后循环切换到每个buffer上,并在但前窗口打开 
+
+" let g:miniBufExplMapCTabSwitchBufs = 1
+
+"则可以用<C-h,j,k,l>切换到上下左右的窗口中去,就像:
+"C-w,h j k l    向"左,下,上,右"切换窗口.
+
+" let g:miniBufExplMapWindowNavVim = 1 
+
+"是用<C-箭头键>切换到上下左右窗口中去
+" let g:miniBufExplMapWindowNavArrows = 1
+"vim 防止出现多个窗口的错误 
+" let g:miniBufExplorerMoreThanOne=0
+
+"智能补全
+" filetype plugin indent on
+" set completeopt=longest,menu
+
+"Map auto complete of (, ", ', [
+"
+" inoremap @1 ()<esc>:let leavechar=")"<cr>i
+" inoremap @2 []<esc>:let leavechar="]"<cr>i
+" inoremap @3 {}<esc>:let leavechar="}"<cr>i
+" inoremap @4 {<esc>o}<esc>:let leavechar="}"<cr>O
+" inoremap @q ''<esc>:let leavechar="'"<cr>i
+" inoremap @w ""<esc>:let leavechar='"'<cr>i
+" Grep================================================================================ 
+"  使用grep查找
+"
+" let Grep_Path = 'F:\GeneralApp\grep20d_win\grep.exe'
+" let Grep_Default_Filelist = '*.[chS]'
+" let Grep_Default_Filelist = '*.c *.cpp *.asm *.s'
+" nnoremap <silent> <F8> :Grep<CR>
+
+" set grepprg=grep\ -nH
+
+map <F8> :execute "vimgrep /" . expand("<cword>") . "/j ../**/*.c *.h" <Bar> cw<CR>
+" =================================================================================================
+" 基本设置
+" =================================================================================================
+"设置窗口大小
+" set lines=1000
+" set columns=1000
+
+" 显示行号
+set nu
+
+" 不要使用vi的键盘模式，而是vim自己的
+set nocompatible
+
+" 在处理未保存或只读文件的时候，弹出确认
+set confirm
+
+" 与windows共享剪贴板
+set clipboard+=unnamed
+
+" 侦测文件类型
+filetype on
+
+" 载入文件类型插件
+filetype plugin on
+
+" 为特定文件类型载入相关缩进文件
+filetype indent on
+
+" 带有如下符号的单词不要被换行分割
+set iskeyword+=_,$,@,%,#,-
+
+" 语法高亮
+syntax on
+colorscheme eclipse 
+
+" 高亮字符，让其不受100列限制
+:highlight OverLength ctermbg=red ctermfg=white guibg=red guifg=white
+:match OverLength '\%101v.*'
+
+" 状态行颜色
+highlight StatusLine guifg=SlateBlue guibg=Yellow
+highlight StatusLineNC guifg=Gray guibg=White
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 文件设置
+" vimwiki
+let g:vimwiki_hl_cb_checked = 1
+let g:vimwiki_use_mouse=1
+let g:vimwiki_camel_case=0
+" let g:vimwiki_list_ignore_newline=0
+" let g:vimwiki_browsers=['F:\Program Files\Mozilla Firefox\firefox.exe']
+let g:vimwiki_CJK_length=1
+let g:vimwiki_folding=1
+let g:vimwiki_fold_lists=1
+map <leader>tt <Plug>VimwikiToggleListItem
+nnoremap <leader>ct :VimwikiTable
+
+
+let wiki_1 = {}
+let wiki_1.path = '/home/cwj/Documents/ms-vimwiki'
+let wiki_1.html = '/home/cwj/Documents/ms-vimwiki/html/'
+let wiki_1.html_header = '/home/cwj/Documents/ms-vimwiki/template/header.tpl'
+let wiki_1.html_footer = '/home/cwj/Documents/ms-vimwiki/template/footer.tpl'
+let wiki_1.nested_syntaxes = {'python': 'python', 'c++': 'cpp', 'vim': 'vim'}
+
+" let wiki_2 = {}
+" let wiki_2.path = '/home/cwj/Dropbox/vimwiki-sunyard/'
+" let wiki_2.html = '/home/cwj/Dropbox/vimwiki-sunyard/html/'
+" let wiki_2.html_header = '/home/cwj/Dropbox/vimwiki-sunyard/template/header.tpl'
+" let wiki_2.html_footer = '/home/cwj/Dropbox/vimwiki-sunyard/template/footer.tpl'
+" let wiki_2.nested_syntaxes = {'python': 'python', 'c++': 'cpp', 'vim': 'vim'}
+
+" let wiki_3 = {}
+" let wiki_3.path = '/home/cwj/Dropbox/vimwiki-pangu/'
+" let wiki_3.html = '/home/cwj/Dropbox/vimwiki-pangu/html/'
+" let wiki_3.html_header = '/home/cwj/Dropbox/vimwiki-pangu/template/header.tpl'
+" let wiki_3.html_footer = '/home/cwj/Dropbox/vimwiki-pangu/template/footer.tpl'
+" let wiki_3.nested_syntaxes = {'python': 'python', 'c++': 'cpp', 'vim': 'vim'}
+" let g:vimwiki_list = [wiki_1, wiki_2, wiki_3]
+let g:vimwiki_list = [wiki_1]
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 不要备份文件（根据自己需要取舍）
+set nobackup
+" set nowritebackup
+" set noswapfile
+
+" 不要生成swap文件，当buffer被丢弃的时候隐藏它
+" set bufhidden=hide
+
+" 字符间插入的像素行数目
+set linespace=0
+
+" 增强模式中的命令行自动完成操作
+set wildmenu
+
+" 在状态行上显示光标所在位置的行号和列号
+set ruler
+set rulerformat=%20(%2*%<%f%=\ %m%r\ %3l\ %c\ %p%%%)
+
+" 命令行（在状态行下）的高度，默认为1，这里是2
+set cmdheight=2
+
+" 使回格键（backspace）正常处理indent, eol, start等
+set backspace=2
+
+" 允许backspace和光标键跨越行边界
+set whichwrap+=<,>,h,l
+
+" 可以在buffer的任何地方使用鼠标（类似office中在工作区双击鼠标定位）
+set mouse=a
+set selection=exclusive
+set selectmode=mouse,key
+
+" 启动的时候不显示那个援助索马里儿童的提示
+set shortmess=atI
+
+" 通过使用: commands命令，告诉我们文件的哪一行被改变过
+set report=0
+
+" 不让vim发出讨厌的滴滴声
+set noerrorbells
+
+" 在被分割的窗口间显示空白，便于阅读
+set fillchars=vert:\ ,stl:\ ,stlnc:\
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 搜索和匹配
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 高亮显示匹配的括号
+set showmatch
+
+" 匹配括号高亮的时间（单位是十分之一秒）
+set matchtime=5
+
+" 在搜索的时候忽略大小写
+set ignorecase
+
+" 不要高亮被搜索的句子（phrases）
+set nohlsearch
+
+" 在搜索时，输入的词句的逐字符高亮（类似firefox的搜索）
+set incsearch
+
+" 输入:set list命令是应该显示些啥？
+set listchars=tab:\|\ ,trail:.,extends:>,precedes:<,eol:$
+
+" 光标移动到buffer的顶部和底部时保持3行距离
+set scrolloff=3
+
+" 不要闪烁
+set novisualbell
+
+" 我的状态行显示的内容（包括文件类型和解码）
+set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}
+
+" 总是显示状态行
+set laststatus=2
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 文本格式和排版
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" 自动格式化tcrqn
+set formatoptions=tcrqn
+
+" 继承前一行的缩进方式，特别适用于多行注释
+set autoindent
+
+" 为C程序提供自动缩进
+set smartindent
+
+" 使用C样式的缩进
+set cindent
+
+" 制表符为4
+set tabstop=4
+
+" 统一缩进为4
+set softtabstop=4
+set shiftwidth=4
+
+" 不要用空格代替制表符
+"set noexpandtab
+set expandtab
+
+" 不要换行
+set nowrap
+
+" 在行和段开始处使用制表符
+set smarttab
+" 设置字体
+" set guifont=Courier\ New:h10:cANSI
+set guifont=Courier\ New\ 10
+
+"+++++++++++防止菜单乱码+++++++++++++++++++++
+set encoding=utf-8
+set fileencodings=utf-8,chinese,latin-1
+if has("win32")
+    set fileencoding=chinese
+else
+    set fileencoding=utf-8
+endif
+
+"解决菜单乱码
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+"解决consle输出乱码
+language messages zh_CN.utf-8
+"+++++++++++++++++++++++++++++++++++++++++++++
+"-------------------------------原先配置--------------------------------------
+set nocompatible
+source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/mswin.vim
+behave mswin
+
+
+" 在85列位置追加 注释'//'
+"
+function! MyAppendCommentary()
+    let s:nCols = col('$')
+    if s:nCols < 84
+        let s:nSpaces = 84 - s:nCols
+    else
+        let s:nSPaces = 1
+    endif
+
+    let s:strBuf = ' '
+    while s:nSpaces > 0
+        let s:strBuf = s:strBuf . ' '
+        let s:nSpaces = s:nSpaces - 1
+    endwhile
+
+    let s:strBuf = s:strBuf . '// '
+    execute "normal \<esc>A".s:strBuf."\<esc>"
+endfunction
+
+noremap ;a :call MyAppendCommentary()<CR>
+
+
+
+
+" ycm plugin
+"
+" let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/cpp/ycm/.ycm_extra_conf.py'
+" let g:ycm_collect_identifiers_from_tags_files = 1
+" let g:ycm_seed_identifiers_with_syntax = 1
+" let g:ycm_confirm_extra_conf = 0
+
+" 不要备份文件（根据自己需要取舍）
+set nobackup
+set nowritebackup
+set noswapfile
+
+
+
+filetype off                   " required!
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+" "call vundle#begin('~/some/path/here')
+"
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+" Plugin 'tpope/vim-fugitive'
+" plugin from http://vim-scripts.org/vim/scripts.html
+" Plugin 'L9'
+" Git plugin not hosted on GitHub
+" Plugin 'git://git.wincent.com/command-t.git'
+" git repos on your local machine (i.e. when working on your own plugin)
+"Plugin 'file://~/.vim/bundle/gmarik/plugin'
+" The sparkup vim script is in a subdirectory of this repo called vim.
+" Pass the path to set the runtimepath properly.
+Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+
+" Avoid a name conflict with L9
+" Plugin 'user/L9', {'name': 'newL9'}
+" Plugin 'Valloric/YouCompleteMe'
+Plugin 'mileszs/ack.vim'
+
+Bundle 'vimwiki'
+Bundle 'Valloric/YouCompleteMe'
+Bundle 'Valloric/ListToggle'
+Bundle 'scrooloose/syntastic'
+
+" All of your Plugins must be added before the following line
+" call vundle#end()            " required
+filetype plugin indent on    " required
+
